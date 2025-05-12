@@ -38,7 +38,7 @@ class Campground(BaseModel):
     availability_updated_at: Optional[datetime] = Field(
         None, alias="availability-updated-at"
     )
-    # address: Optinal[str] = "" For bonus point
+    address: Optional[str] = ""
 
 
 

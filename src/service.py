@@ -3,7 +3,9 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from sqlalchemy.orm import Session
-from models import Campground as CampgroundDB, CampgroundAttributes
+from models import Campground as PydanticCampground, CampgroundResponse
+from schemas import Campground as CampgroundDB
+
 from urllib.parse import urlparse, parse_qs
 from playwright.async_api import async_playwright
 
@@ -47,8 +49,7 @@ response_data = '''{
     }
 }'''
 
-
-async def fetch_campgrounds():
+async def fetch_campgrounds(db: Session):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
@@ -65,8 +66,7 @@ async def fetch_campgrounds():
             if "api/v6/locations/search-results" in response.url and response.status == 200:
                 try:
                     data = await response.json()
-                    print(response_data)
-                    # save_campgrounds(response_data)
+                    save_campground_response(db, data)
                 except:
                     print("Failed to parse response JSON")
 
@@ -88,18 +88,39 @@ async def fetch_campgrounds():
         await browser.close()
     return []
 
-# def save_campgrounds(db: Session, campgrounds: list[CampgroundDB]):
-#     for camp in campgrounds:
-#         existing = db.query(CampgroundDB).filter_by(id=camp.id).first()
-#         data = camp.dict(by_alias=True)
-#         if existing:
-#             for key, value in data.items():
-#                 setattr(existing, key, value)
-#         else:
-#             db.add(CampgroundDB(**data))
-#     db.commit()
+def save_campground_response(db: Session, response: CampgroundResponse):
+    for item in response.data:
+        db_obj = create_campground_from_response(item)
+        db.merge(db_obj)
+    db.commit()
 
 
-def save_campgrounds(data):
-    temp = CampgroundAttributes(**data)
-    print(temp)
+
+def create_campground_from_response(data: PydanticCampground) -> CampgroundDB:
+    attr = data.attributes
+    images = attr.images or []
+
+    return CampgroundDB(
+        id=data.id,
+        type=data.type,
+        name=attr.name,
+        latitude=attr.latitude,
+        longitude=attr.longitude,
+        rating=attr.rating,
+        region_name=attr.state,
+        administrative_area=attr.state,
+        nearest_city_name=attr.city,
+        accommodation_type_names=[],
+        bookable=False,
+        camper_types=[],
+        operator=None,
+        photo_url=images[0].url if images else None,
+        photo_urls=[img.url for img in images],
+        photos_count=len(images),
+        reviews_count=0,
+        slug=None,
+        price_low=None,
+        price_high=None,
+        availability_updated_at=None,
+        address=attr.address,
+    )

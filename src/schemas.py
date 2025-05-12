@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, JSON
 from .db import Base
 
+
 class Campground(Base):
     __tablename__ = "campgrounds"
 
@@ -25,3 +26,4 @@ class Campground(Base):
     price_low = Column(Float, nullable=True)
     price_high = Column(Float, nullable=True)
     availability_updated_at = Column(DateTime, nullable=True)
+    address = Column(String, nullable=True)
