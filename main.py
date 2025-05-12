@@ -1,12 +1,28 @@
-"""
-Main entrypoint for The Dyrt web scraper case study.
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from src import SessionLocal, engine, Base, fetch_campgrounds, save_campgrounds
 
-Usage:
-    The scraper can be run directly (`python main.py`) or via Docker Compose (`docker compose up`).
+app = FastAPI()
 
-If you have any questions in mind you can connect to me directly via info@smart-maple.com
-"""
+# DB tablolarını oluştur
+Base.metadata.create_all(bind=engine)
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-if __name__ == "__main__":
-    print("Hello Smart Maple!")
+@app.get("/")
+def root():
+    return {"message": "Scraper API is running."}
+
+@app.post("/scrape")
+def scrape_campgrounds(db: Session = Depends(get_db)):
+    try:
+        data = fetch_campgrounds()
+        save_campgrounds(db, data)
+        return {"status": "success", "count": len(data)}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}

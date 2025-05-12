@@ -1,1 +1,8 @@
 pydantic~=2.10
+playwright
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+httpx
+python-dotenv

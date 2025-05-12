@@ -4,6 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, HttpUrl
 
 
+
 class CampgroundLinks(BaseModel):
 
     self: HttpUrl
@@ -38,3 +39,4 @@ class Campground(BaseModel):
         None, alias="availability-updated-at"
     )
     # address: Optinal[str] = "" For bonus point
+
