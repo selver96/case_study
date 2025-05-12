@@ -40,3 +40,49 @@ class Campground(BaseModel):
     )
     # address: Optinal[str] = "" For bonus point
 
+
+
+class Image(BaseModel):
+    url: str
+    caption: str
+
+
+class CampgroundAttributes(BaseModel):
+    name: str
+    latitude: float
+    longitude: float
+    rating: Optional[float] = None
+    price: Optional[str] = None
+    amenities: List[str]
+    description: Optional[str] = None
+    max_vehicle_length: Optional[int] = None
+    electric_amperage: Optional[int] = None
+    air_quality: Optional[str] = None
+    drive_time: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    postal_code: Optional[str] = None
+    country: Optional[str] = None
+    website: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    operating_hours: Optional[str] = None
+    images: Optional[List[Image]] = None
+
+
+class CampgroundData(BaseModel):
+    id: str
+    type: str
+    attributes: CampgroundAttributes
+
+
+class Meta(BaseModel):
+    total: int
+    page: int
+    per_page: int
+
+
+class CampgroundResponse(BaseModel):
+    data: List[CampgroundData]
+    meta: Meta
